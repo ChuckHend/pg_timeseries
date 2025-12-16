@@ -21,7 +21,7 @@
         "PostgreSQL": "14.0.0"
       },
       "recommends": {
-        "columnar": "1.1.2",
+        "citus": "13.0.0",
         "pg_cron": "1.6.2",
         "pg_ivm": "1.9.0",
         "pg_partman": "4.5.1"

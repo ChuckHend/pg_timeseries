@@ -51,8 +51,15 @@ jobs:
         run: |
           sudo ~/.cargo/bin/trunk install --pg-version=${{matrix.pg_version}} pg_partman
           sudo ~/.cargo/bin/trunk install --pg-version=${{matrix.pg_version}} pg_cron
-          sudo ~/.cargo/bin/trunk install --pg-version=${{matrix.pg_version}} hydra_columnar
           sudo ~/.cargo/bin/trunk install --pg-version=${{matrix.pg_version}} tembo_ivm
+          # Install Citus from source
+          git clone https://github.com/citusdata/citus.git
+          cd citus
+          ./configure --without-libcurl
+          make
+          sudo make install
+          cd ..
+          rm -rf citus
 
       - uses: actions/checkout@v3
 

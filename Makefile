@@ -1,11 +1,7 @@
-EXTENSION    = $(shell grep -m 1 '"name":' META.json | \
-               sed -e 's/[[:space:]]*"name":[[:space:]]*"\([^"]*\)",/\1/')
-EXTVERSION   = $(shell grep -m 1 '[[:space:]]\{6\}"version":' META.json | \
-               sed -e 's/[[:space:]]*"version":[[:space:]]*"\([^"]*\)",\{0,1\}/\1/')
+EXTENSION    = timeseries
+EXTVERSION    = $(shell grep "^default_version" timeseries.control | sed -r "s/default_version[^']+'([^']+).*/\1/")
 DISTVERSION  = $(shell grep -m 1 '[[:space:]]\{3\}"version":' META.json | \
                sed -e 's/[[:space:]]*"version":[[:space:]]*"\([^"]*\)",\{0,1\}/\1/')
-
-EXTVERSIONS = 0.1.6
 
 DATA 		 = $(wildcard sql/*--*.sql)
 DATA_built   = $(foreach v,$(EXTVERSIONS),sql/$(EXTENSION)--$(v).sql)
@@ -30,11 +26,11 @@ latest-changes.md: Changes
 
 # generate each version's file installation file by concatenating
 # previous upgrade scripts
-sql/$(EXTENSION)--0.1.6.sql: sql/$(EXTENSION).sql
-	cat $^ > $@
+sql/$(EXTENSION)--$(EXTVERSION).sql: sql/$(EXTENSION).sql
+	cp $< $@
 
-install-tembo-ivm:
-	git clone https://github.com/tembo-io/pg_ivm.git && \
+install-ivm:
+	git clone https://github.com/sraoss/pg_ivm.git && \
 	cd pg_ivm && \
     make && make install && \
 	cd .. && rm -rf pg_ivm
@@ -51,10 +47,12 @@ install-pg-cron:
 	make && make install && \
     cd .. && rm -rf pg_cron
 
-install-hydra:
-	git clone https://github.com/hydradatabase/hydra && \
-    cd hydra/columnar &&  \
-    ./configure && \
-    make && make install
+install-citus:
+	git clone https://github.com/citusdata/citus.git && \
+	cd citus && \
+	./configure --without-libcurl && \
+	make && \
+	make install && \
+	cd .. && rm -rf citus
 
-install-dependencies: install-tembo-ivm install-pg-partman install-pg-cron install-hydra
+install-dependencies: install-ivm install-pg-partman install-pg-cron install-citus

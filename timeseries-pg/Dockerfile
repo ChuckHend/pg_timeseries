@@ -1,4 +1,4 @@
-FROM postgres:16 AS builder
+FROM postgres:17 AS builder
 
 RUN apt-get update \
     && apt-get install -y \
@@ -14,7 +14,7 @@ RUN apt-get update \
 	libzstd-dev \
 	make \
 	pkg-config \
-	postgresql-server-dev-16
+	postgresql-server-dev-17
 
 WORKDIR /timeseries
 
@@ -29,13 +29,13 @@ RUN git clone https://github.com/pgpartman/pg_partman.git && \
     make && make install && \
     cd .. && rm -rf pg_partman
 
-RUN git clone https://github.com/hydradatabase/hydra && \
-    cd hydra/columnar &&  \
-    ./configure && \
+RUN git clone https://github.com/citusdata/citus.git && \
+    cd citus &&  \
+    ./configure --without-libcurl && \
     make && make install && \
-	cd ../.. && rm -rf hydra
+	cd .. && rm -rf citus
 
-RUN git clone https://github.com/tembo-io/pg_ivm.git && \
+RUN git clone https://github.com/sraoss/pg_ivm.git && \
 	cd pg_ivm && \
 	make && make install && \
 	cd .. && rm -rf pg_ivm
@@ -44,7 +44,7 @@ RUN git clone https://github.com/tembo-io/pg_ivm.git && \
 COPY . .
 RUN make && make install || true
 
-FROM postgres:16-bookworm
+FROM postgres:17-bookworm
 COPY --from=builder /usr/share/postgresql/16/extension /usr/share/postgresql/16/extension
 COPY --from=builder /usr/lib/postgresql/16/lib /usr/lib/postgresql/16/lib
 
