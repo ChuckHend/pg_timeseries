@@ -45,7 +45,7 @@ jobs:
 
       - name: Start PostgreSQL
         run: >
-          sudo pg_dropcluster 14 main &&
+          sudo pg_dropcluster ${{matrix.pg_version}} main &&
           sudo pg_createcluster ${{matrix.pg_version}} main --start -- -A trust
 
       - name: Test extension
