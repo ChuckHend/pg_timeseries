@@ -31,11 +31,11 @@ jobs:
             postgresql-${{matrix.pg_version}} \
             postgresql-server-dev-${{matrix.pg_version}}
 
+      - uses: actions/checkout@v4
+
       - name: Install dependencies
         run: |
           make install-dependencies
-
-      - uses: actions/checkout@v4
 
       - name: Install extension
         run: sudo make install
