@@ -4,12 +4,8 @@ on:
   pull_request:
     branches:
       - main
-  
-  push:
-    branches:
-      - img-release
 
-jobs:
+      jobs:
   installcheck:
     name: Test ${{ matrix.pg }}
     runs-on: ubuntu-latest

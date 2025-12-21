@@ -3,24 +3,22 @@ on:
   push:
     # Release on semantic version tag.
     tags: ['v[0-9]+.[0-9]+.[0-9]+']
-    branches:
-      - img-release
 
 jobs:
-  # pgxn-release:
-  #   name: Release on PGXN
-  #   runs-on: ubuntu-latest
-  #   container: pgxn/pgxn-tools
-  #   steps:
-  #   - name: Check out the repo
-  #     uses: actions/checkout@v4
-  #   - name: Bundle the Release
-  #     run: pgxn-bundle
-  #   - name: Release on PGXN
-  #     env:
-  #       PGXN_USERNAME: ${{ secrets.PGXN_USERNAME }}
-  #       PGXN_PASSWORD: ${{ secrets.PGXN_PASSWORD }}
-  #     run: pgxn-release
+  pgxn-release:
+    name: Release on PGXN
+    runs-on: ubuntu-latest
+    container: pgxn/pgxn-tools
+    steps:
+    - name: Check out the repo
+      uses: actions/checkout@v4
+    - name: Bundle the Release
+      run: pgxn-bundle
+    - name: Release on PGXN
+      env:
+        PGXN_USERNAME: ${{ secrets.PGXN_USERNAME }}
+        PGXN_PASSWORD: ${{ secrets.PGXN_PASSWORD }}
+      run: pgxn-release
   build_and_push_amd64:
     name: Build and push AMD64 images
     if: github.repository_owner == 'ChuckHend'
