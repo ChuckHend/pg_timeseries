@@ -15,6 +15,7 @@ jobs:
         pg: [16, 17]
     container: 
       image: pgxn/pgxn-tools
+      options: --user postgres
     steps:
       - uses: actions/checkout@v4
       - name: Install system dependencies
