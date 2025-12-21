@@ -48,7 +48,7 @@ FROM postgres:@@PG_VERSION@@-bookworm AS final
 COPY --from=builder /usr/share/postgresql/@@PG_VERSION@@/extension /usr/share/postgresql/@@PG_VERSION@@/extension
 COPY --from=builder /usr/lib/postgresql/@@PG_VERSION@@/lib /usr/lib/postgresql/@@PG_VERSION@@/lib
 
-COPY timeseries.conf .
+COPY images/timeseries-pg/timeseries.conf .
 RUN cat timeseries.conf >> /usr/share/postgresql/@@PG_VERSION@@/postgresql.conf.sample
 
 USER postgres
