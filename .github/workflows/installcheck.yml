@@ -8,7 +8,7 @@ on:
 jobs:
   installcheck:
     name: Test ${{ matrix.pg }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu--latest
     strategy:
       fail-fast: false
       matrix:
