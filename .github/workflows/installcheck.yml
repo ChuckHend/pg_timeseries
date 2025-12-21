@@ -7,67 +7,25 @@ on:
 
 jobs:
   installcheck:
+    name: Test ${{ matrix.pg }}
+    runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
-        pg_version: [14, 15, 16]
-        os: [ubuntu-latest]
-
-    runs-on: ${{matrix.os}}
+        pg: [16, 17]
+    container: 
+      image: pgxn/pgxn-tools
     steps:
-      - name: Add PGDG repo
-        run: >
-          sudo sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list' &&
-          sudo sh -c 'wget -qO - https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg' &&
-          sudo apt-get update
-
-      - name: Install/modify postgresql-common
-        run: >
-          sudo apt-get install -y --no-install-recommends postgresql-common &&
-          sudo sed -ri 's/#(create_main_cluster) .*$/\1 = false/' /etc/postgresql-common/createcluster.conf
-
-      # rust needed to install trunk
-      - name: Install Rust stable toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-
-      - name: Install stoml and pg-trunk
-        shell: bash
-        run: |
-          set -xe
-          wget https://github.com/freshautomations/stoml/releases/download/v0.7.1/stoml_linux_amd64 &> /dev/null
-          mv stoml_linux_amd64 stoml
-          chmod +x stoml
-          sudo mv stoml /usr/local/bin/
-          cargo install pg-trunk
-
-      - name: Install PostgreSQL and server-dev
-        run: >
-          sudo apt-get install -y --no-install-recommends \
-            postgresql-${{matrix.pg_version}} \
-            postgresql-server-dev-${{matrix.pg_version}}
-
-      - name: Install dependencies
-        run: |
-          sudo ~/.cargo/bin/trunk install --pg-version=${{matrix.pg_version}} pg_partman
-          sudo ~/.cargo/bin/trunk install --pg-version=${{matrix.pg_version}} pg_cron
-          sudo ~/.cargo/bin/trunk install --pg-version=${{matrix.pg_version}} hydra_columnar
-          sudo ~/.cargo/bin/trunk install --pg-version=${{matrix.pg_version}} tembo_ivm
-
-      - uses: actions/checkout@v3
-
-      - name: Install extension
-        run: sudo make install
-
-      - name: Start PostgreSQL
-        run: >
-          sudo pg_dropcluster 14 main &&
-          sudo pg_createcluster ${{matrix.pg_version}} main --start -- -A trust
-
-      - name: Test extension
-        id: installcheck
-        run: PGUSER=postgres PGCLUSTER=${{matrix.pg_version}}/main make installcheck
-
+      - uses: actions/checkout@v4
+      - name: Install system dependencies
+        run: apt-get update && apt-get install -y liblz4-dev libzstd-dev libkrb5-dev autoconf automake libtool
+      # https://github.com/pgxn/docker-pgxn-tools?tab=readme-ov-file#unprivileged-user-workflow
+      - run: pg-start ${{ matrix.pg }}
+      - run: chown -R postgres:postgres .
+      - run: make install-dependencies
+      - run: gosu postgres pg-build-test
       - name: Display results
-        if: failure() && steps.installcheck.outcome != 'success'
-        run: cat regression.diffs
+        if: failure()
+        run: |
+          cat regression.diffs
+          cat /__w/pg_timeseries/pg_timeseries/log/initdb.log

@@ -396,10 +396,12 @@ BEGIN
 
     IF part_am <> 'columnar' AND
        part_end < (now() - comp_offset) THEN
-      PERFORM columnar.alter_table_set_access_method(
+      -- Note: columnar.alter_table_set_access_method() works on individual partitions (leaf tables)
+      -- but cannot be called on partitioned tables. This is fine here because show_partitions()
+      -- returns leaf partitions only.
+      PERFORM alter_table_set_access_method(
         part_row.partition_schemaname || '.' ||
         part_row.partition_tablename, 'columnar');
-      EXECUTE format('ALTER TABLE %I ATTACH PARTITION %I.%I FOR VALUES FROM (%L) TO (%L)', target_table_id, part_row.partition_schemaname, part_row.partition_tablename, part_beg, part_end);
     END IF;
   END LOOP;
 END;
