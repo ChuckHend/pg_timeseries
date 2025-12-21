@@ -7,58 +7,23 @@ on:
 
 jobs:
   installcheck:
+    name: Test ${{ matrix.pg }}
+    runs-on: ubuntu-22.04
     strategy:
+      fail-fast: false
       matrix:
-        pg_version: [16, 17]
-        os: [ubuntu-latest]
-
-    runs-on: ${{matrix.os}}
+        pg: [16, 17]
+    container: pgxn/pgxn-tools
     steps:
-      - name: Add PGDG repo
-        run: >
-          sudo sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list' &&
-          sudo sh -c 'wget -qO - https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/apt.postgresql.org.gpg' &&
-          sudo apt-get update
-
-      - name: Install/modify postgresql-common
-        run: >
-          sudo apt-get install -y --no-install-recommends postgresql-common &&
-          sudo sed -ri 's/#(create_main_cluster) .*$/\1 = false/' /etc/postgresql-common/createcluster.conf
-
-      - name: Install PostgreSQL and server-dev
-        run: >
-          sudo apt-get install -y --no-install-recommends \
-            postgresql-${{matrix.pg_version}} \
-            postgresql-server-dev-${{matrix.pg_version}} \
-            libkrb5-dev \
-            libssl-dev \
-            libcurl4-openssl-dev
-
       - uses: actions/checkout@v4
-
-      - name: Install dependencies
+      - name: Install system dependencies
+        run: apt-get update && apt-get install -y liblz4-dev libzstd-dev libkrb5-dev
+      - name: Start PostgreSQL and install dependencies
         run: |
-          sudo PG_CONFIG=/usr/lib/postgresql/${{matrix.pg_version}}/bin/pg_config make install-dependencies
-
-      - name: Install extension
-        run: sudo PG_CONFIG=/usr/lib/postgresql/${{matrix.pg_version}}/bin/pg_config make install
-
-      - name: Start PostgreSQL
-        run: |
-          sudo pg_dropcluster --stop ${{matrix.pg_version}} main || true
-          sudo pg_createcluster ${{matrix.pg_version}} main --start -- -A trust
-
-      - name: Test extension
-        id: installcheck
-        env:
-          PGUSER: postgres
-          PGHOST: /var/run/postgresql
-        run: |
-          make clean
-          make
-          sudo make install
-          make installcheck REGRESS_OPTS="--inputdir=test --use-existing"
+          pg-start ${{ matrix.pg }}
+          make install-dependencies
+      - run: pg-build-test
 
       - name: Display results
-        if: failure() && steps.installcheck.outcome != 'success'
+        if: failure()
         run: cat regression.diffs
