@@ -50,7 +50,7 @@ install-pg-cron:
 install-citus:
 	git clone https://github.com/citusdata/citus.git && \
 	cd citus && \
-	./configure --without-libcurl && \
+	./configure && \
 	make && \
 	make install && \
 	cd .. && rm -rf citus
