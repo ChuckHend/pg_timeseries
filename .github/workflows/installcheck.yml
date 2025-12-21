@@ -44,7 +44,8 @@ jobs:
         run: sudo PG_CONFIG=/usr/lib/postgresql/${{matrix.pg_version}}/bin/pg_config make install
 
       - name: Start PostgreSQL
-        run: >
+        run: |
+          sudo pg_dropcluster --stop ${{matrix.pg_version}} main || true
           sudo pg_createcluster ${{matrix.pg_version}} main --start -- -A trust
 
       - name: Test extension
