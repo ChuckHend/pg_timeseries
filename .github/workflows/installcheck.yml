@@ -13,13 +13,11 @@ jobs:
       fail-fast: false
       matrix:
         pg: [16, 17]
-    container: pgxn/pgxn-tools
+    container: 
+      image: pgxn/pgxn-tools
+      options: --user root
     steps:
       - uses: actions/checkout@v4
-      - name: Fix permissions
-        run: |
-          sudo chown -R postgres:postgres .
-          sudo chmod -R 755 .
       - name: Install system dependencies
         run: apt-get update && apt-get install -y liblz4-dev libzstd-dev libkrb5-dev autoconf automake libtool
       - name: Start PostgreSQL and install dependencies
