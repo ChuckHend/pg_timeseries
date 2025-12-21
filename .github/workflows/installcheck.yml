@@ -15,7 +15,6 @@ jobs:
         pg: [16, 17]
     container: 
       image: pgxn/pgxn-tools
-      options: --user root
     steps:
       - uses: actions/checkout@v4
       - name: Install system dependencies
@@ -29,4 +28,6 @@ jobs:
           pg-build-test
       - name: Display results
         if: failure()
-        run: cat regression.diffs
+        run: |
+          cat regression.diffs
+          cat /__w/pg_timeseries/pg_timeseries/log/initdb.log
