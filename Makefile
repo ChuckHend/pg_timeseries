@@ -30,7 +30,7 @@ sql/$(EXTENSION)--$(EXTVERSION).sql: sql/$(EXTENSION).sql
 	cp $< $@
 
 install-ivm:
-	git clone https://github.com/sraoss/pg_ivm.git && \
+	git clone https://github.com/chuckhend/pg_ivm.git && \
 	cd pg_ivm && \
     make && make install && \
 	cd .. && rm -rf pg_ivm

@@ -1,4 +1,5 @@
 \set SHOW_CONTEXT never
+SET client_min_messages TO WARNING;
 CREATE EXTENSION citus;
 CREATE EXTENSION citus_columnar;
 CREATE EXTENSION pg_ivm;
@@ -128,22 +129,6 @@ SELECT premake FROM part_config WHERE parent_table='public.measurements';
 (1 row)
 
 SELECT apply_compression_policy('measurements', '1 day');
-NOTICE:  creating a new table for public.measurements_p20251113
-NOTICE:  moving the data of public.measurements_p20251113
-NOTICE:  dropping the old public.measurements_p20251113
-NOTICE:  renaming the new table to public.measurements_p20251113
-NOTICE:  creating a new table for public.measurements_p20251120
-NOTICE:  moving the data of public.measurements_p20251120
-NOTICE:  dropping the old public.measurements_p20251120
-NOTICE:  renaming the new table to public.measurements_p20251120
-NOTICE:  creating a new table for public.measurements_p20251127
-NOTICE:  moving the data of public.measurements_p20251127
-NOTICE:  dropping the old public.measurements_p20251127
-NOTICE:  renaming the new table to public.measurements_p20251127
-NOTICE:  creating a new table for public.measurements_p20251204
-NOTICE:  moving the data of public.measurements_p20251204
-NOTICE:  dropping the old public.measurements_p20251204
-NOTICE:  renaming the new table to public.measurements_p20251204
  apply_compression_policy 
 --------------------------
  
@@ -274,7 +259,17 @@ CREATE VIEW events_totals AS
   FROM events
   GROUP BY 1;
 SELECT make_view_incremental('events_5m');
+ make_view_incremental 
+-----------------------
+ 
+(1 row)
+
 SELECT make_view_incremental('events_totals');
+ make_view_incremental 
+-----------------------
+ 
+(1 row)
+
 SELECT * FROM events_5m ORDER BY 1, 2;
  user_id |          event_time          | max | min 
 ---------+------------------------------+-----+-----

@@ -1,4 +1,5 @@
 \set SHOW_CONTEXT never
+SET client_min_messages TO WARNING;
 
 CREATE EXTENSION citus;
 CREATE EXTENSION citus_columnar;
