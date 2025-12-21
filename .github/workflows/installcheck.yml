@@ -54,10 +54,10 @@ jobs:
           PGUSER: postgres
           PGCLUSTER: ${{matrix.pg_version}}/main
         run: |
-          make clean
-          make
-          make install
-          make installcheck
+          sudo make clean && \
+          sudo make
+          sudo make install
+          sudo make installcheck
 
       - name: Display results
         if: failure() && steps.installcheck.outcome != 'success'
