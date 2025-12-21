@@ -12,13 +12,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg: [16, 17]
+        pg: [16, 17, 18]
     container: 
       image: pgxn/pgxn-tools
     steps:
       - uses: actions/checkout@v4
       - name: Install system dependencies
-        run: apt-get update && apt-get install -y liblz4-dev libzstd-dev libkrb5-dev autoconf automake libtool
+        run: apt-get update && apt-get install -y curl libcurl4-openssl-dev liblz4-dev libzstd-dev libkrb5-dev autoconf automake libtool
       # https://github.com/pgxn/docker-pgxn-tools?tab=readme-ov-file#unprivileged-user-workflow
       - run: pg-start ${{ matrix.pg }}
       - run: chown -R postgres:postgres .

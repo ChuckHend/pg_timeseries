@@ -9,7 +9,7 @@ The purpose of this extension is to provide a cohesive user experience around th
 Start a Docker container running Postgres with `pg_timeseries` pre-installed.
 
 ```bash
-docker run -d --name pg-timeseries -p 5432:5432 -e POSTGRES_PASSWORD=postgres quay.io/tembo/timeseries-pg:latest
+docker run -d --name pg-timeseries -p 5432:5432 -e POSTGRES_PASSWORD=postgres ghcr.io/chuckhend/pg17-timeseries:latest
 ```
 
 Then connect to the database and enable the extension:
@@ -23,10 +23,11 @@ CREATE EXTENSION timeseries CASCADE;
 ```
 
 ```text
-NOTICE:  installing required extension "columnar"
+NOTICE:  installing required extension "citus"
+NOTICE:  installing required extension "citus_columnar"
 NOTICE:  installing required extension "pg_cron"
-NOTICE:  installing required extension "pg_partman"
 NOTICE:  installing required extension "pg_ivm"
+NOTICE:  installing required extension "pg_partman"
 CREATE EXTENSION
 ```
 
@@ -57,7 +58,7 @@ The time-series tables you create start out life as little more than typical [pa
 
 ### Partition Sizing
 
-Related to the above information on indexes is the question of partition size. Because calculating the total size of partitioned tables can be tedious, Tembo's extension provides several easy-to-use views surfacing this information.
+Related to the above information on indexes is the question of partition size. Because calculating the total size of partitioned tables can be tedious, this extension provides several easy-to-use views surfacing this information.
 
 To examine the table (data), index, and total size for each of your partitions, simple query the time-series partition information view, `ts_part_info`. A general rule of thumb is that each partition should be able to fit within roughly one quarter of your available memory. This assumes that not much apart from the time-series workload is going on, and things like parallel workers may complicate matters, but work on getting partition total size down to around a quarter of your memory and you're off to a good start.
 

@@ -1,20 +1,23 @@
-FROM postgres:17 AS builder
+FROM postgres:@@PG_VERSION@@-bookworm AS builder
 
 RUN apt-get update \
     && apt-get install -y \
 	autoconf \
+	automake \
 	ca-certificates \
 	clang \
 	curl \
 	gcc \
 	git \
 	libcurl4-openssl-dev \
+	libkrb5-dev \
 	liblz4-dev \
 	libssl-dev \
+	libtool \
 	libzstd-dev \
 	make \
 	pkg-config \
-	postgresql-server-dev-17
+	postgresql-server-dev-@@PG_VERSION@@
 
 WORKDIR /timeseries
 
@@ -44,11 +47,11 @@ RUN git clone https://github.com/ChuckHend/pg_ivm.git && \
 COPY . .
 RUN make && make install || true
 
-FROM postgres:17-bookworm
-COPY --from=builder /usr/share/postgresql/17/extension /usr/share/postgresql/17/extension
-COPY --from=builder /usr/lib/postgresql/17/lib /usr/lib/postgresql/17/lib
+FROM postgres:@@PG_VERSION@@-bookworm AS final
+COPY --from=builder /usr/share/postgresql/@@PG_VERSION@@/extension /usr/share/postgresql/@@PG_VERSION@@/extension
+COPY --from=builder /usr/lib/postgresql/@@PG_VERSION@@/lib /usr/lib/postgresql/@@PG_VERSION@@/lib
 
-COPY timeseries.conf .
-RUN cat timeseries.conf >> /usr/share/postgresql/17/postgresql.conf.sample
+COPY images/timeseries-pg/timeseries.conf .
+RUN cat timeseries.conf >> /usr/share/postgresql/@@PG_VERSION@@/postgresql.conf.sample
 
 USER postgres

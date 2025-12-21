@@ -9,7 +9,7 @@ DATA_built   = $(foreach v,$(EXTVERSIONS),sql/$(EXTENSION)--$(v).sql)
 DOCS         = $(wildcard doc/*.md)
 TESTS        = $(wildcard test/sql/*.sql)
 REGRESS      = $(patsubst test/sql/%.sql,%,$(TESTS))
-REGRESS_OPTS = --temp-config=./timeseries.conf --temp-instance=./tmp_check --inputdir=test
+REGRESS_OPTS = --temp-config=./images/timeseries-pg/timeseries.conf --temp-instance=./tmp_check --inputdir=test
 PG_CONFIG ?= pg_config
 EXTRA_CLEAN = sql/$(EXTENSION)--$(EXTVERSION).sql
 
@@ -50,7 +50,7 @@ install-pg-cron:
 install-citus:
 	git clone https://github.com/citusdata/citus.git && \
 	cd citus && \
-	./configure --without-libcurl && \
+	./configure && \
 	make && \
 	make install && \
 	cd .. && rm -rf citus

@@ -673,7 +673,7 @@ BEGIN
   SET LOCAL log_min_messages TO warning;
 
   -- create an immv with the original view's SQL
-  PERFORM create_immv(immv_name, orig_view_sql);
+  PERFORM pgivm.create_immv(immv_name, orig_view_sql);
 
   -- restore previous client/log levels
   EXECUTE format('SET LOCAL client_min_messages TO %s', old_client_msg);

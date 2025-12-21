@@ -3,6 +3,7 @@ on:
   push:
     # Release on semantic version tag.
     tags: ['v[0-9]+.[0-9]+.[0-9]+']
+
 jobs:
   pgxn-release:
     name: Release on PGXN
@@ -18,19 +19,20 @@ jobs:
         PGXN_USERNAME: ${{ secrets.PGXN_USERNAME }}
         PGXN_PASSWORD: ${{ secrets.PGXN_PASSWORD }}
       run: pgxn-release
-  container-image-release:
+  build_and_push_amd64:
+    name: Build and push AMD64 images
     if: github.repository_owner == 'ChuckHend'
-    name: Build and push images
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        pg: [17]
+        pg: [16, 17, 18]
     outputs:
       short_sha: ${{ steps.versions.outputs.SHORT_SHA }}
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
+
       - name: Install stoml
         shell: bash
         run: |
@@ -47,8 +49,6 @@ jobs:
           echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
           echo "TAG_VER=$(grep 'default_version' timeseries.control | cut -d "'" -f 2)" >> $GITHUB_OUTPUT
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -59,18 +59,127 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set package visibility to public
-        run: |
-          echo "Setting package visibility to public"
-          echo "::set-output name=package_visibility::public"
+      - name: Generate dockerfile from template file
+        working-directory: ./
+        run: ./images/timeseries-pg/replace-pg-version.sh ${{ matrix.pg }} ./images/timeseries-pg/Dockerfile.in ./images/timeseries-pg/Dockerfile
 
       - name: Build and push -- Releases
-        uses: docker/build-push-action@v5
+        run: |
+          docker build \
+            -f ./images/timeseries-pg/Dockerfile \
+            -t ghcr.io/chuckhend/pg${{ matrix.pg }}-timeseries:v${{ steps.versions.outputs.TAG_VER }}-amd64 \
+            -t ghcr.io/chuckhend/pg${{ matrix.pg }}-timeseries:latest-amd64 .
+          docker push ghcr.io/chuckhend/pg${{ matrix.pg }}-timeseries:v${{ steps.versions.outputs.TAG_VER }}-amd64
+          docker push ghcr.io/chuckhend/pg${{ matrix.pg }}-timeseries:latest-amd64
+
+  build_and_push_arm64:
+    name: Build and push ARM64 images
+    if: github.repository_owner == 'ChuckHend'
+    runs-on: ubicloud-standard-2-arm-ubuntu-2204
+    strategy:
+      fail-fast: false
+      matrix:
+        pg: [16, 17, 18]
+    outputs:
+      short_sha: ${{ steps.versions.outputs.SHORT_SHA }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Install stoml
+        shell: bash
+        run: |
+          set -xe
+          sudo apt-get update && sudo apt-get install -y wget
+          wget https://github.com/freshautomations/stoml/releases/download/v0.7.1/stoml_linux_armv7 &> /dev/null
+          mv stoml_linux_armv7 stoml
+          chmod +x stoml
+          sudo mv stoml /usr/local/bin/
+
+      - name: Set version strings
+        id: versions
+        run: |
+          echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "TAG_VER=$(grep 'default_version' timeseries.control | cut -d "'" -f 2)" >> $GITHUB_OUTPUT
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
         with:
-          file: ./timeseries-pg/Dockerfile
-          context: .
-          platforms: linux/amd64, linux/arm64
-          push: true
-          tags: |
-            ghcr.io/ChuckHend/pg${{matrix.pg}}-timeseries:v${{ steps.versions.outputs.TAG_VER }}
-            ghcr.io/ChuckHend/pg${{matrix.pg}}-timeseries:latest
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate dockerfile from template file
+        working-directory: ./
+        run: ./images/timeseries-pg/replace-pg-version.sh ${{ matrix.pg }} ./images/timeseries-pg/Dockerfile.in ./images/timeseries-pg/Dockerfile
+
+      - name: Build and push -- Releases
+        run: |
+          docker build \
+            -f ./images/timeseries-pg/Dockerfile \
+            --platform linux/arm64 \
+            -t ghcr.io/chuckhend/pg${{ matrix.pg }}-timeseries:v${{ steps.versions.outputs.TAG_VER }}-arm64 \
+            -t ghcr.io/chuckhend/pg${{ matrix.pg }}-timeseries:latest-arm64 .
+          docker push ghcr.io/chuckhend/pg${{ matrix.pg }}-timeseries:v${{ steps.versions.outputs.TAG_VER }}-arm64
+          docker push ghcr.io/chuckhend/pg${{ matrix.pg }}-timeseries:latest-arm64
+
+  create_manifest:
+    name: Create and push manifests
+    runs-on: ubuntu-latest
+    needs: [build_and_push_arm64, build_and_push_amd64]
+    strategy:
+      fail-fast: false
+      matrix:
+        pg: [16, 17, 18]
+    outputs:
+      short_sha: ${{ steps.versions.outputs.SHORT_SHA }}
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install stoml
+        shell: bash
+        run: |
+          set -xe
+          sudo apt-get update && sudo apt-get install -y wget
+          wget https://github.com/freshautomations/stoml/releases/download/v0.7.1/stoml_linux_amd64 &> /dev/null
+          mv stoml_linux_amd64 stoml
+          chmod +x stoml
+          sudo mv stoml /usr/local/bin/
+
+      - name: Set version strings
+        id: versions
+        run: |
+          echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+          echo "TAG_VER=$(grep 'default_version' timeseries.control | cut -d "'" -f 2)" >> $GITHUB_OUTPUT
+
+      - name: Create and push Docker manifest -- Releases
+        run: |
+          docker manifest create ghcr.io/chuckhend/pg${{ matrix.pg }}-timeseries:latest \
+            ghcr.io/chuckhend/pg${{ matrix.pg }}-timeseries:latest-arm64 \
+            ghcr.io/chuckhend/pg${{ matrix.pg }}-timeseries:latest-amd64
+
+          docker manifest annotate ghcr.io/chuckhend/pg${{ matrix.pg }}-timeseries:latest ghcr.io/chuckhend/pg${{ matrix.pg }}-timeseries:latest-arm64 --arch arm64 --os linux
+          docker manifest annotate ghcr.io/chuckhend/pg${{ matrix.pg }}-timeseries:latest ghcr.io/chuckhend/pg${{ matrix.pg }}-timeseries:latest-amd64 --arch amd64 --os linux
+          docker manifest push ghcr.io/chuckhend/pg${{ matrix.pg }}-timeseries:latest
+
+          docker manifest create ghcr.io/chuckhend/pg${{ matrix.pg }}-timeseries:v${{ steps.versions.outputs.TAG_VER }} \
+            ghcr.io/chuckhend/pg${{ matrix.pg }}-timeseries:v${{ steps.versions.outputs.TAG_VER }}-arm64 \
+            ghcr.io/chuckhend/pg${{ matrix.pg }}-timeseries:v${{ steps.versions.outputs.TAG_VER }}-amd64
+
+          docker manifest annotate ghcr.io/chuckhend/pg${{ matrix.pg }}-timeseries:v${{ steps.versions.outputs.TAG_VER }} ghcr.io/chuckhend/pg${{ matrix.pg }}-timeseries:v${{ steps.versions.outputs.TAG_VER }}-arm64 --arch arm64 --os linux
+          docker manifest annotate ghcr.io/chuckhend/pg${{ matrix.pg }}-timeseries:v${{ steps.versions.outputs.TAG_VER }} ghcr.io/chuckhend/pg${{ matrix.pg }}-timeseries:v${{ steps.versions.outputs.TAG_VER }}-amd64 --arch amd64 --os linux
+          docker manifest push ghcr.io/chuckhend/pg${{ matrix.pg }}-timeseries:v${{ steps.versions.outputs.TAG_VER }}
