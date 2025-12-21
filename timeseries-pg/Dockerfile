@@ -35,7 +35,7 @@ RUN git clone https://github.com/citusdata/citus.git && \
     make && make install && \
 	cd .. && rm -rf citus
 
-RUN git clone https://github.com/sraoss/pg_ivm.git && \
+RUN git clone https://github.com/ChuckHend/pg_ivm.git && \
 	cd pg_ivm && \
 	make && make install && \
 	cd .. && rm -rf pg_ivm
@@ -45,10 +45,10 @@ COPY . .
 RUN make && make install || true
 
 FROM postgres:17-bookworm
-COPY --from=builder /usr/share/postgresql/16/extension /usr/share/postgresql/16/extension
-COPY --from=builder /usr/lib/postgresql/16/lib /usr/lib/postgresql/16/lib
+COPY --from=builder /usr/share/postgresql/17/extension /usr/share/postgresql/17/extension
+COPY --from=builder /usr/lib/postgresql/17/lib /usr/lib/postgresql/17/lib
 
 COPY timeseries.conf .
-RUN cat timeseries.conf >> /usr/share/postgresql/16/postgresql.conf.sample
+RUN cat timeseries.conf >> /usr/share/postgresql/17/postgresql.conf.sample
 
 USER postgres
