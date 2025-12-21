@@ -50,7 +50,14 @@ jobs:
 
       - name: Test extension
         id: installcheck
-        run: PGUSER=postgres PGCLUSTER=${{matrix.pg_version}}/main make installcheck
+        env:
+          PGUSER: postgres
+          PGCLUSTER: ${{matrix.pg_version}}/main
+        run: |
+          make clean
+          make
+          make install
+          make installcheck
 
       - name: Display results
         if: failure() && steps.installcheck.outcome != 'success'
