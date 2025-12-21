@@ -1,5 +1,5 @@
 # time series extension
 comment = 'Convenience API for timeseries on Postgres'
-default_version = '0.1.7'
+default_version = '0.1.8'
 module_pathname = '$libdir/timeseries'
 requires = 'citus, citus_columnar, pg_cron, pg_ivm, pg_partman'
