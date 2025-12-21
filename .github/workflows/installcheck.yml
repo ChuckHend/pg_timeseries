@@ -20,13 +20,11 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install system dependencies
         run: apt-get update && apt-get install -y liblz4-dev libzstd-dev libkrb5-dev autoconf automake libtool
-      - name: Start PostgreSQL and install dependencies
-        run: |
-          pg-start ${{ matrix.pg }}
-          make install-dependencies
-      - name: Build and test extension
-        run: |
-          pg-build-test
+      # https://github.com/pgxn/docker-pgxn-tools?tab=readme-ov-file#unprivileged-user-workflow
+      - run: pg-start ${{ matrix.pg }}
+      - run: chown -R postgres:postgres .
+      - run: make install-dependencies
+      - run: gosu postgres pg-build-test
       - name: Display results
         if: failure()
         run: |
