@@ -52,12 +52,12 @@ jobs:
         id: installcheck
         env:
           PGUSER: postgres
-          PGCLUSTER: ${{matrix.pg_version}}/main
+          PGHOST: /var/run/postgresql
         run: |
-          sudo make clean && \
-          sudo make
+          make clean
+          make
           sudo make install
-          sudo make installcheck
+          make installcheck REGRESS_OPTS="--inputdir=test --use-existing"
 
       - name: Display results
         if: failure() && steps.installcheck.outcome != 'success'
