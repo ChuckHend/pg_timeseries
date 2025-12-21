@@ -22,7 +22,11 @@ jobs:
         run: |
           pg-start ${{ matrix.pg }}
           make install-dependencies
-      - run: pg-build-test
+      - name: Build and test extension
+        run: |
+          make
+          make install
+          make installcheck
 
       - name: Display results
         if: failure()
