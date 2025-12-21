@@ -29,7 +29,10 @@ jobs:
         run: >
           sudo apt-get install -y --no-install-recommends \
             postgresql-${{matrix.pg_version}} \
-            postgresql-server-dev-${{matrix.pg_version}}
+            postgresql-server-dev-${{matrix.pg_version}} \
+            libkrb5-dev \
+            libssl-dev \
+            libcurl4-openssl-dev
 
       - uses: actions/checkout@v4
 
