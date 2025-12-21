@@ -35,7 +35,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          PG_CONFIG=/usr/lib/postgresql/${{matrix.pg_version}}/bin/pg_config make install-dependencies
+          sudo PG_CONFIG=/usr/lib/postgresql/${{matrix.pg_version}}/bin/pg_config make install-dependencies
 
       - name: Install extension
         run: sudo PG_CONFIG=/usr/lib/postgresql/${{matrix.pg_version}}/bin/pg_config make install
