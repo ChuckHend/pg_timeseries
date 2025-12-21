@@ -27,7 +27,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg: [16, 17]
+        pg: [16, 17, 18]
     outputs:
       short_sha: ${{ steps.versions.outputs.SHORT_SHA }}
     steps:
