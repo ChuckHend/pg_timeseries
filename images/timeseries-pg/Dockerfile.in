@@ -3,14 +3,17 @@ FROM postgres:@@PG_VERSION@@-bookworm AS builder
 RUN apt-get update \
     && apt-get install -y \
 	autoconf \
+	automake \
 	ca-certificates \
 	clang \
 	curl \
 	gcc \
 	git \
 	libcurl4-openssl-dev \
+	libkrb5-dev \
 	liblz4-dev \
 	libssl-dev \
+	libtool \
 	libzstd-dev \
 	make \
 	pkg-config \
