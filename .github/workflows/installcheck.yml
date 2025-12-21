@@ -16,6 +16,10 @@ jobs:
     container: pgxn/pgxn-tools
     steps:
       - uses: actions/checkout@v4
+      - name: Fix permissions
+        run: |
+          sudo chown -R postgres:postgres .
+          sudo chmod -R 755 .
       - name: Install system dependencies
         run: apt-get update && apt-get install -y liblz4-dev libzstd-dev libkrb5-dev autoconf automake libtool
       - name: Start PostgreSQL and install dependencies
