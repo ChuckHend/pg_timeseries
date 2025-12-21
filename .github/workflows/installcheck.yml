@@ -5,7 +5,7 @@ on:
     branches:
       - main
 
-      jobs:
+jobs:
   installcheck:
     name: Test ${{ matrix.pg }}
     runs-on: ubuntu-latest
