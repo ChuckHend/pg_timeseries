@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg: [16, 17]
+        pg: [16, 17, 18]
     container: 
       image: pgxn/pgxn-tools
     steps:

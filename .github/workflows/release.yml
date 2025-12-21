@@ -3,21 +3,23 @@ on:
   push:
     # Release on semantic version tag.
     tags: ['v[0-9]+.[0-9]+.[0-9]+']
+    branches:
+      - img-release
 jobs:
-  pgxn-release:
-    name: Release on PGXN
-    runs-on: ubuntu-latest
-    container: pgxn/pgxn-tools
-    steps:
-    - name: Check out the repo
-      uses: actions/checkout@v4
-    - name: Bundle the Release
-      run: pgxn-bundle
-    - name: Release on PGXN
-      env:
-        PGXN_USERNAME: ${{ secrets.PGXN_USERNAME }}
-        PGXN_PASSWORD: ${{ secrets.PGXN_PASSWORD }}
-      run: pgxn-release
+  # pgxn-release:
+  #   name: Release on PGXN
+  #   runs-on: ubuntu-latest
+  #   container: pgxn/pgxn-tools
+  #   steps:
+  #   - name: Check out the repo
+  #     uses: actions/checkout@v4
+  #   - name: Bundle the Release
+  #     run: pgxn-bundle
+  #   - name: Release on PGXN
+  #     env:
+  #       PGXN_USERNAME: ${{ secrets.PGXN_USERNAME }}
+  #       PGXN_PASSWORD: ${{ secrets.PGXN_PASSWORD }}
+  #     run: pgxn-release
   container-image-release:
     if: github.repository_owner == 'ChuckHend'
     name: Build and push images
@@ -25,7 +27,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        pg: [17]
+        pg: [16, 17, 18]
     outputs:
       short_sha: ${{ steps.versions.outputs.SHORT_SHA }}
     steps:
@@ -64,10 +66,14 @@ jobs:
           echo "Setting package visibility to public"
           echo "::set-output name=package_visibility::public"
 
+      - name: Generate dockerfile from template file
+        working-directory: ./
+        run: ./images/timeseries-pg/replace-pg-version.sh ${{ matrix.pg }} ./images/timeseries-pg/Dockerfile.in ./images/timeseries-pg/Dockerfile
+
       - name: Build and push -- Releases
         uses: docker/build-push-action@v5
         with:
-          file: ./timeseries-pg/Dockerfile
+          file: ./images/timeseries-pg/Dockerfile
           context: .
           platforms: linux/amd64, linux/arm64
           push: true
