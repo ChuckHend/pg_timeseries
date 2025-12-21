@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install system dependencies
-        run: apt-get update && apt-get install -y liblz4-dev libzstd-dev libkrb5-dev
+        run: apt-get update && apt-get install -y liblz4-dev libzstd-dev libkrb5-dev autoconf automake libtool
       - name: Start PostgreSQL and install dependencies
         run: |
           pg-start ${{ matrix.pg }}
