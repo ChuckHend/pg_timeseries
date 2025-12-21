@@ -1,4 +1,4 @@
-FROM postgres:@@PG_VERSION@@-bookworm as builder
+FROM postgres:@@PG_VERSION@@-bookworm AS builder
 
 RUN apt-get update \
     && apt-get install -y \
@@ -44,7 +44,7 @@ RUN git clone https://github.com/ChuckHend/pg_ivm.git && \
 COPY . .
 RUN make && make install || true
 
-FROM postgres:@@PG_VERSION@@-bookworm as builder
+FROM postgres:@@PG_VERSION@@-bookworm AS final
 COPY --from=builder /usr/share/postgresql/@@PG_VERSION@@/extension /usr/share/postgresql/@@PG_VERSION@@/extension
 COPY --from=builder /usr/lib/postgresql/@@PG_VERSION@@/lib /usr/lib/postgresql/@@PG_VERSION@@/lib
 
