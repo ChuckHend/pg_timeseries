@@ -1,7 +1,7 @@
 {
   "name": "timeseries",
-  "abstract": "Convenience API for Tembo time series stack",
-  "description": "Convenience API for Tembo time series stack",
+  "abstract": "Convenience API for time series on Postgres",
+  "description": "Convenience API for time series on Postgres",
   "version": "0.1.7",
   "maintainer": [
     "Jason Petersen <jason@tembo.io>"
@@ -9,7 +9,7 @@
   "license": "mit",
   "provides": {
     "timeseries": {
-      "abstract": "Convenience API for Tembo time series stack",
+      "abstract": "Convenience API for time series on Postgres",
       "file": "sql/timeseries.sql",
       "docfile": "doc/timeseries.md",
       "version": "0.1.6"
@@ -30,11 +30,11 @@
   },
   "resources": {
     "bugtracker": {
-      "web": "https://github.com/tembo-io/pg_timeseries/issues/"
+      "web": "https://github.com/chuckhend/pg_timeseries/issues/"
     },
     "repository": {
-      "url": "git://github.com/tembo-io/pg_timeseries.git",
-      "web": "https://github.com/tembo-io/pg_timeseries/",
+      "url": "git://github.com/chuckhend/pg_timeseries.git",
+      "web": "https://github.com/chuckhend/pg_timeseries/",
       "type": "git"
     }
   },
