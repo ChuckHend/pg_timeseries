@@ -370,7 +370,7 @@ BEGIN
 
   -- make sure we have the expected columnar extension available
   IF NOT _extension_exists('citus_columnar') THEN
-      RAISE NOTICE object_not_in_prerequisite_state USING
+      RAISE object_not_in_prerequisite_state USING
       MESSAGE = 'Cannot apply compression policy',
       DETAIL  = 'The citus_columnar extension is required to apply a compression policy',
       HINT    = 'Did you forget to run "CREATE EXTENSION citus_columnar" ?';
@@ -664,7 +664,7 @@ BEGIN
   
   -- make sure we have the expected pg_ivm extension available
   IF NOT _extension_exists('pg_ivm') THEN
-      RAISE NOTICE object_not_in_prerequisite_state USING
+      RAISE object_not_in_prerequisite_state USING
       MESSAGE = 'Cannot create incremental view',
       DETAIL  = 'The pg_ivm extension is required to create incremental views with pg_timeseries',
       HINT    = 'Did you forget to run "CREATE EXTENSION pg_ivm" ?';

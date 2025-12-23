@@ -23,10 +23,7 @@ CREATE EXTENSION timeseries CASCADE;
 ```
 
 ```text
-NOTICE:  installing required extension "citus"
-NOTICE:  installing required extension "citus_columnar"
 NOTICE:  installing required extension "pg_cron"
-NOTICE:  installing required extension "pg_ivm"
 NOTICE:  installing required extension "pg_partman"
 CREATE EXTENSION
 ```
@@ -74,6 +71,13 @@ Sometimes you know older data isn't queried very often, but still don't want to 
 
 By calling `set_ts_compression_policy` on a time-series table with an appropriate interval (perhaps`'1 month'`), this extension will take care of compressing partitions (using a columnar storage method) older than the specified interval, once an hour. As with the retention policy functionality, a function is also provided for clearing any existing policy (existing partitions will not be decompressed, however).
 
+The compression features depend on the [citus](https://github.com/citusdata/citus/tree/main) and [citus_columnar](https://github.com/citusdata/citus/tree/main/src/backend/columnar) extensions. You will need to enable these extensions in order to use these features:
+
+```sql
+CREATE EXTENSION citus;
+CREATE EXTENSION citus_columnar;
+```
+
 ### Analytics Helpers
 
 This extension includes several functions intended to make writing correct time-series queries easier. Certain concepts can be difficult to express in standard SQL and helper functions can aid in readability and maintainability.
@@ -111,16 +115,23 @@ The output of this query will differ from simply hitting the target table direct
 
 This function accepts a view and converts it into a materialized view which is kept up-to-date after every modification. This removes the need for users to pick between always up-to-date `VIEW`s and having to call `REFRESH` on `MATERIALIZED VIEW`s.
 
-The underlying functionality is provided by [`pg_ivm`](https://github.com/sraoss/pg_ivm); consult that project for more information.
+The underlying functionality is provided by [a fork](https://github.com/ChuckHend/pg_ivm) of [`pg_ivm`](https://github.com/sraoss/pg_ivm); consult that project for more information. Enable this extension if you want to use this feature.
+
+```sql
+CREATE EXTENSION pg_ivm
+```
 
 ## Requirements
 
-As seen in the Docker installation demonstration, the `pg_timeseries` extension depends on three other extensions:
+As seen in the Docker installation demonstration, the `pg_timeseries` extension depends on several other extensions:
 
-* [Hydra Columnar](https://github.com/hydradatabase/hydra)
 * [pg_cron](https://github.com/citusdata/pg_cron)
 * [pg_partman](https://github.com/pgpartman/pg_partman)
+
+
+## Optional Dependencies
 * [pg_ivm](https://github.com/sraoss/pg_ivm)
+* [Citus & Citus Columnar](https://github.com/citusdata/citus)
 
 We recommend referring to documentation within these projects for more advanced use cases, or for a better understanding at how this extension works.
 
