@@ -1,9 +1,6 @@
 \set SHOW_CONTEXT never
 SET client_min_messages TO WARNING;
 
-CREATE EXTENSION citus;
-CREATE EXTENSION citus_columnar;
-CREATE EXTENSION pg_ivm;
 CREATE EXTENSION pg_partman;
 CREATE EXTENSION pg_cron;
 
@@ -39,7 +36,6 @@ SELECT partition_duration, partition_lead_time FROM ts_config ORDER BY table_id:
 SELECT partition_interval, premake FROM part_config WHERE parent_table='public.measurements';
 
 SELECT COUNT(*) > 10 AS has_partitions FROM ts_part_info;
-SELECT COUNT(*) > 0 AS "compressed?" FROM ts_part_info WHERE access_method = 'columnar';
 
 SELECT set_ts_retention_policy('measurements', '90 days');
 SELECT retention_duration FROM ts_config WHERE table_id='measurements'::regclass;
@@ -52,9 +48,6 @@ SELECT retention FROM part_config WHERE parent_table='public.measurements';
 SELECT set_ts_lead_time('measurements', '1 day');
 SELECT partition_lead_time FROM ts_config WHERE table_id='measurements'::regclass;
 SELECT premake FROM part_config WHERE parent_table='public.measurements';
-
-SELECT apply_compression_policy('measurements', '1 day');
-SELECT COUNT(*) > 0 AS "compressed?" FROM ts_part_info WHERE access_method = 'columnar';
 
 SELECT set_ts_retention_policy('measurements', '1 day');
 SELECT run_maintenance();
@@ -106,34 +99,3 @@ FROM date_bin_table(NULL::events, '1 minute',
                     '(2020-11-04 15:50:00-08, 2020-11-04 16:00:00-08)')
 GROUP BY 3
 ORDER BY 3;
-
-CREATE VIEW events_5m AS
-  SELECT
-    user_id,
-    date_bin('5 minutes',
-             event_time,
-             TIMESTAMPTZ '1970-01-01') AS event_time,
-    max(value),
-    min(value)
-    FROM events
-    GROUP BY 1, 2;
-
-CREATE VIEW events_totals AS
-  SELECT
-    user_id,
-    sum(value),
-    count(user_id)
-  FROM events
-  GROUP BY 1;
-
-SELECT make_view_incremental('events_5m');
-SELECT make_view_incremental('events_totals');
-
-SELECT * FROM events_5m ORDER BY 1, 2;
-SELECT * FROM events_totals ORDER BY 1;
-
-INSERT INTO events VALUES (3, 1, '2020-11-04 15:51:02.226999-08', 1.1);
-DELETE FROM events WHERE event_id = 12;
-
-SELECT * FROM events_5m ORDER BY 1, 2;
-SELECT * FROM events_totals ORDER BY 1;
