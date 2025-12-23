@@ -368,6 +368,15 @@ BEGIN
     RETURN;
   END IF;
 
+  -- make sure we have the expected columnar extension available
+  IF NOT _extension_exists('citus_columnar') THEN
+      RAISE NOTICE object_not_in_prerequisite_state USING
+      MESSAGE = 'Cannot apply compression policy',
+      DETAIL  = 'The citus_columnar extension is required to apply a compression policy',
+      HINT    = 'Did you forget to run "CREATE EXTENSION citus_columnar" ?';
+    RETURN;
+  END IF;
+
   SELECT format('%s.%s', n.nspname, c.relname)
   INTO table_name
   FROM pg_class c
@@ -652,6 +661,15 @@ DECLARE
   old_client_msg text;
   old_log_msg text;
 BEGIN
+  
+  -- make sure we have the expected pg_ivm extension available
+  IF NOT _extension_exists('pg_ivm') THEN
+      RAISE NOTICE object_not_in_prerequisite_state USING
+      MESSAGE = 'Cannot create incremental view',
+      DETAIL  = 'The pg_ivm extension is required to create incremental views with pg_timeseries',
+      HINT    = 'Did you forget to run "CREATE EXTENSION pg_ivm" ?';
+    RETURN;
+  END IF;
   -- check that target_view_id is actually a view
   -- check that target_view_id mentions only one table
 
@@ -691,4 +709,15 @@ BEGIN
   EXECUTE format('CREATE OR REPLACE VIEW %I AS SELECT %s FROM %s',
                  target_view_id, columns_sql, immv_name);
 END;
+$function$;
+
+CREATE FUNCTION @extschema@._extension_exists(extension_name TEXT)
+    RETURNS BOOLEAN
+    LANGUAGE SQL
+AS $function$
+SELECT EXISTS (
+    SELECT 1
+    FROM pg_extension
+    WHERE extname = extension_name
+)
 $function$;
