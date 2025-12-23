@@ -1,6 +1,9 @@
 \set SHOW_CONTEXT never
 SET client_min_messages TO WARNING;
 
+DROP EXTENSION IF EXISTS citus;
+DROP EXTENSION IF EXISTS citus_columnar;
+DROP EXTENSION IF EXISTS pg_ivm;
 CREATE EXTENSION pg_partman;
 CREATE EXTENSION pg_cron;
 
@@ -99,3 +102,6 @@ FROM date_bin_table(NULL::events, '1 minute',
                     '(2020-11-04 15:50:00-08, 2020-11-04 16:00:00-08)')
 GROUP BY 3
 ORDER BY 3;
+
+SELECT apply_compression_policy('events', '1 day');
+SELECT make_view_incremental('events');

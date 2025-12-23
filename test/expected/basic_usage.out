@@ -1,5 +1,8 @@
 \set SHOW_CONTEXT never
 SET client_min_messages TO WARNING;
+DROP EXTENSION IF EXISTS citus;
+DROP EXTENSION IF EXISTS citus_columnar;
+DROP EXTENSION IF EXISTS pg_ivm;
 CREATE EXTENSION pg_partman;
 CREATE EXTENSION pg_cron;
 CREATE EXTENSION timeseries;
@@ -220,3 +223,11 @@ ORDER BY 3;
              2 | 1.9000000000000001 | Wed Nov 04 15:59:00 2020 PST
 (9 rows)
 
+SELECT apply_compression_policy('events', '1 day');
+ERROR:  Cannot apply compression policy
+DETAIL:  The citus_columnar extension is required to apply a compression policy
+HINT:  Did you forget to run "CREATE EXTENSION citus_columnar" ?
+SELECT make_view_incremental('events');
+ERROR:  Cannot create incremental view
+DETAIL:  The pg_ivm extension is required to create incremental views with pg_timeseries
+HINT:  Did you forget to run "CREATE EXTENSION pg_ivm" ?
