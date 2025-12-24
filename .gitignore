@@ -3,3 +3,5 @@ results/
 # ignore latest install file
 timeseries--?.?.?.sql
 !timeseries--?.?.?--?.?.?.sql
+# Dockerfile is templated via Dockerfile.in
+images/timeseries-pg/Dockerfile
