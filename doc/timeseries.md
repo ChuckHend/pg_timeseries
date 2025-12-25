@@ -1,6 +1,9 @@
-# Time-Series on Postgres
+# Time Series on Postgres
 
-The purpose of this extension is to provide a cohesive user experience around the creation, maintenance, and use of time-series tables.
+This extension provides a cohesive user experience around the creation, maintenance, and use of time-series tables.
+
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16%20%7C%2017%20%7C%2018-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![PGXN version](https://badge.fury.io/pg/timeseries.svg)](https://pgxn.org/dist/timeseries/)
 
 ## Installation
 
