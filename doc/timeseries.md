@@ -12,7 +12,7 @@ This extension provides a cohesive user experience around the creation, maintena
 Start a Docker container running Postgres with `pg_timeseries` pre-installed.
 
 ```bash
-docker run -d --name pg-timeseries -p 5432:5432 -e POSTGRES_PASSWORD=postgres ghcr.io/chuckhend/pg17-timeseries:latest
+docker run -d --name pg-timeseries -p 5432:5432 -e POSTGRES_PASSWORD=postgres ghcr.io/chuckhend/pg18-timeseries:latest
 ```
 
 Then connect to the database and enable the extension:
