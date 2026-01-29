@@ -1,6 +1,6 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: pg_timeseries
-Source: https://github.com/dino2gnt/pg_timeseries_extension
+Source: https://github.com/ChuckHend/pg_timeseries
 
 Files: *
 Copyright: Copyright (c) 2024, Tembo

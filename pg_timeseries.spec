@@ -7,8 +7,8 @@ Name:       pg_%{sname}_%{pgmajorversion}
 Version:    %{pgtsversion}
 Release:    1%{?dist}
 License:    PostgreSQL
-URL:        https://github.com/dino2gnt/pg_%{sname}_extension/
-Source0:    https://github.com/dino2gnt/pg_%{sname}_extension/archive/refs/tags/v%{version}.tar.gz
+URL:        https://github.com/ChuckHend/pg_%{sname}/
+Source0:    https://github.com/ChuckHend/pg_%{sname}/archive/refs/tags/v%{version}.tar.gz
 BuildRequires:  postgresql%{pgmajorversion}-devel
 BuildArch: noarch
 Requires:   postgresql%{pgmajorversion}-server

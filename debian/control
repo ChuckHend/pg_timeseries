@@ -7,9 +7,9 @@ Build-Depends:
  postgresql-@pgmajorversion@ <!nocheck>,
  postgresql-server-dev-@pgmajorversion@,
 Standards-Version: 4.7.2
-Vcs-Browser: https://github.com/dino2gnt/pg_timeseries_extension
-Vcs-Git: https://github.com/dino2gnt/pg_timeseries_extension.git
-Homepage: https://github.com/dino2gnt/pg_timeseries_extension
+Vcs-Browser: https://github.com/ChuckHend/pg_timeseries
+Vcs-Git: https://github.com/ChuckHend/pg_timeseries.git
+Homepage: https://github.com/ChuckHend/pg_timeseries
 
 Package: postgresql-@pgmajorversion@-timeseries
 Architecture: all
