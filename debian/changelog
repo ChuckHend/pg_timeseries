@@ -1,0 +1,6 @@
+pg-timeseries (0.1.8) unstable; urgency=medium
+
+  * Debian's requirement for a changelog is stupid
+
+ -- Dino Yancey <dyancey@opennms.com>  Wed, 17 Dec 2025 11:16:27 +0100
+

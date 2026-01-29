@@ -1,0 +1,24 @@
+Source: pg-timeseries
+Section: database
+Priority: optional
+Maintainer: Dino Yancey <dyancey@opennms.com>
+Build-Depends:
+ debhelper-compat (= 13),
+ postgresql-@pgmajorversion@ <!nocheck>,
+ postgresql-server-dev-@pgmajorversion@,
+Standards-Version: 4.7.2
+Vcs-Browser: https://github.com/dino2gnt/pg_timeseries_extension
+Vcs-Git: https://github.com/dino2gnt/pg_timeseries_extension.git
+Homepage: https://github.com/dino2gnt/pg_timeseries_extension
+
+Package: postgresql-@pgmajorversion@-timeseries
+Architecture: all
+Depends:
+ ${misc:Depends},
+ ${postgresql:Depends},
+ ${shlibs:Depends},
+Breaks:
+ ${postgresql:Breaks},
+Description: Simple timeseries tables for PostgreSQL
+ pg_timeseries provides a cohesive user experience around the creation, maintenance,
+ and use of time-series tables.
