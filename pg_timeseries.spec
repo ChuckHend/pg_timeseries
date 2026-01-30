@@ -20,7 +20,7 @@ Provides a cohesive user experience around the creation, maintenance,
 and use of time-series tables.
 
 %prep
-%setup -q -n pg_%{sname}_extension-%{version}
+%setup -q -n pg_%{sname}-%{version}
 
 %build
 USE_PGXS=1 PATH=%{pginstdir}/bin:$PATH %{__make} %{?_smp_mflags}
