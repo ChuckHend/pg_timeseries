@@ -1,0 +1,129 @@
+---
+name: pg_timeseries extension builer
+run-name: Build PostgreSQL pg_timeseries extension
+on:
+  push:
+  workflow_dispatch:
+
+## Build and create the project on every push ...  this should be fiiiiine, right?
+jobs:
+
+# Debian packages
+  debs:
+    strategy:
+      max-parallel: 2
+      matrix:
+        pg_version: [ 15, 16, 17, 18 ]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Prepare env
+        run: |
+          sudo apt install -y postgresql-common ca-certificates
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y devscripts build-essential debhelper postgresql-${{ matrix.pg_version }} postgresql-server-dev-${{ matrix.pg_version }}
+      - uses: actions/checkout@v4
+      - name: Add workspace to git safe.directory
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Create Debian packages
+        run: |
+          git checkout debian/control
+          sed -i 's/@pgmajorversion@/${{ matrix.pg_version }}/g' debian/control
+          VER=$(grep "default_version" timeseries.control | sed -n "s/.*'\(.*\)'.*/\1/p")
+          dch -M -v "$VER" "Release $VER"
+          debuild --no-sign
+      - name: Collect Debian build artifacts
+        run: |
+          mkdir -p debian/artifacts
+          mv ../*.deb debian/artifacts
+      - name: Persist Debian build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: postgresql-${{ matrix.pg_version }}-timeseries-deb
+          path: debian/artifacts/*
+      - name: Release ${{ github.ref_name }}
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          fail_on_unmatched_files: true
+          files: |
+            debian/artifacts/*.deb
+
+# RPM Packages
+  el9-rpms:
+    runs-on: ubuntu-latest
+    container:
+      image: rockylinux/rockylinux:9
+      options: --privileged
+    strategy:
+      max-parallel: 1
+      matrix:
+        pg_version: [ 15, 16, 17, 18 ]
+    steps:
+      - name: Prepare env
+        run: |
+          dnf -y install epel-release
+          dnf -y install https://ftp.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+          dnf -y install --enablerepo=crb postgresql${{ matrix.pg_version }}-server postgresql${{ matrix.pg_version }}-devel rpm-build
+      - uses: actions/checkout@v4
+
+      - name: Create RPM packages
+        run: |
+          mkdir -p ~/rpmbuild/SOURCES
+          VER=$(grep "default_version" timeseries.control | sed -n "s/.*'\(.*\)'.*/\1/p")
+          rpmbuild --define "pgmajorversion ${{ matrix.pg_version }}" --define "pgtsversion $VER" --undefine=_disable_source_fetch -bb pg_timeseries.spec
+      - name: Collect RPM build artifacts
+        run: |
+          mkdir -p rpm/artifacts
+          mv "${HOME}/rpmbuild" rpm/artifacts
+      - name: Persist RPM build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pg-timeseries-${{ matrix.pg_version }}-el9-rpm
+          path: rpm/artifacts/*
+      - name: Release ${{ github.ref_name }}
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          fail_on_unmatched_files: true
+          files: |
+            rpm/artifacts/rpmbuild/RPMS/**
+  el10-rpms:
+    runs-on: ubuntu-latest
+    container:
+      image: rockylinux/rockylinux:10
+      options: --privileged
+    strategy:
+      max-parallel: 1
+      matrix:
+        pg_version: [ 15, 16, 17, 18 ]
+    steps:
+      - name: Prepare env
+        run: |
+          dnf -y install epel-release
+          dnf -y install https://ftp.postgresql.org/pub/repos/yum/reporpms/EL-10-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+          dnf -y install --enablerepo=crb postgresql${{ matrix.pg_version }}-server postgresql${{ matrix.pg_version }}-devel rpm-build
+      - uses: actions/checkout@v4
+
+      - name: Create RPM packages
+        run: |
+          mkdir -p ~/rpmbuild/SOURCES
+          VER=$(grep "default_version" timeseries.control | sed -n "s/.*'\(.*\)'.*/\1/p")
+          rpmbuild --define "pgmajorversion ${{ matrix.pg_version }}" --define "pgtsversion $VER" --undefine=_disable_source_fetch -bb pg_timeseries.spec
+      - name: Collect RPM build artifacts
+        run: |
+          mkdir -p rpm/artifacts
+          mv "${HOME}/rpmbuild" rpm/artifacts
+      - name: Persist RPM build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pg-timeseries-${{ matrix.pg_version }}-el10-rpm
+          path: rpm/artifacts/*
+      - name: Release ${{ github.ref_name }}
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          fail_on_unmatched_files: true
+          files: |
+            rpm/artifacts/rpmbuild/RPMS/**
