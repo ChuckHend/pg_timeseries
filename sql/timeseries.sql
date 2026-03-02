@@ -494,19 +494,19 @@ $function$;
 
 -- Defines an aggregate that returns the first value in a table from one column
 -- (the "value" column) when sorted by a second column (the "rank" column)
-CREATE OR REPLACE AGGREGATE first(value anyelement, rank anycompatible) (
-    SFUNC = first_agg,
+CREATE OR REPLACE AGGREGATE @extschema@.first(value anyelement, rank anycompatible) (
+    SFUNC = @extschema@.first_agg,
     STYPE = text[],
-    FINALFUNC = endpoint_final,
+    FINALFUNC = @extschema@.endpoint_final,
     FINALFUNC_EXTRA
 );
 
 -- Defines an aggregate that returns the last value in a table from one column
 -- (the "value" column) when sorted by a second column (the "rank" column)
-CREATE OR REPLACE AGGREGATE last(value anyelement, rank anycompatible) (
-    SFUNC = last_agg,
+CREATE OR REPLACE AGGREGATE @extschema@.last(value anyelement, rank anycompatible) (
+    SFUNC = @extschema@.last_agg,
     STYPE = text[],
-    FINALFUNC = endpoint_final,
+    FINALFUNC = @extschema@.endpoint_final,
     FINALFUNC_EXTRA
 );
 
@@ -621,7 +621,7 @@ $function$;
 
 -- Aggregate for LOCF. For use in a WINDOW clause
 CREATE AGGREGATE locf(anyelement) (
-  SFUNC = locf_agg,
+  SFUNC = @extschema@.locf_agg,
   STYPE = anyelement
 );
 
