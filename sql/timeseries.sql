@@ -650,7 +650,7 @@ CREATE AGGREGATE locf(anyelement) (
 -- query. Big picture: the user can create an aggregating view, check it
 -- quickly (with a LIMIT, for instance), then make it incremental once they
 -- have verified it's producing the aggregate rows they want.
-CREATE OR REPLACE FUNCTION public.make_view_incremental(target_view_id regclass)
+CREATE OR REPLACE FUNCTION @extschema@.make_view_incremental(target_view_id regclass)
  RETURNS void
  LANGUAGE plpgsql
 AS $function$
