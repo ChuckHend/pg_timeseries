@@ -48,6 +48,13 @@ COPY . .
 RUN make && make install || true
 
 FROM postgres:@@PG_VERSION@@-bookworm AS final
+
+# citus.so links against libcurl at runtime (even when built with --without-libcurl,
+# newer citus versions may not honor that flag, so the runtime .so must be present)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends libcurl4 \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY --from=builder /usr/share/postgresql/@@PG_VERSION@@/extension /usr/share/postgresql/@@PG_VERSION@@/extension
 COPY --from=builder /usr/lib/postgresql/@@PG_VERSION@@/lib /usr/lib/postgresql/@@PG_VERSION@@/lib
 
